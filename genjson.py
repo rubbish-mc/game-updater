@@ -33,6 +33,7 @@ filename_re = re.compile(r'^.+$')
 def gen_current_time():
 	return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 
+# function origin from: https://gist.github.com/rji/b38c7238128edf53a181
 def sha256_checksum(filename, block_size=65536):
 	sha256 = hashlib.sha256()
 	with open(filename, 'rb') as f:
@@ -47,7 +48,6 @@ def read_with_re(prompt, r, error_msg='Input error, please try again: '):
 	return string
 
 def main():
-	
 	try:
 		with open('LATEST') as fin:
 			old_j = json.load(fin)
@@ -65,39 +65,48 @@ def main():
 	else:
 		new_j['version']['minor'] += 1
 
-	new_j['info'] = {
-		'diff':
-			{'filename': read_with_re('Please input `diff\' filename: ', filename_re)},
-		'full':
-			{'filename': read_with_re('Please input `full\' filename: ', filename_re)},
-		'complete':
-			{'filename': read_with_re('Please input `complete\' filename: ', filename_re)}
-		}
+	new_j['acquire_complete_update'] = bool(yes_re.match(raw_input('Do you want to force acquire client update? [y/N]: ')))
+
+	if not new_j['acquire_complete_update']:
+		new_j['info'] = {
+			'diff':
+				{'filename': read_with_re('Please input `diff\' filename: ', filename_re)},
+			'full':
+				{'filename': read_with_re('Please input `full\' filename: ', filename_re)},
+			'complete':
+				{'filename': read_with_re('Please input `complete\' filename: ', filename_re)}
+			}
+	else:
+		new_j['info'] = {
+			'complete':
+				{'filename': read_with_re('Please input `complete\' filename: ', filename_re)}
+			}
 
 	for _ ,_info in new_j['info'].items():
 		new_j['info'][_]['filename'] += '.zip'
 
-	new_j['info']['diff'].update({'size': os.stat(new_j['info']['diff']['filename']).st_size, 
-		'checksum': sha256_checksum(new_j['info']['diff']['filename'])})
-	new_j['info']['full'].update({'size': os.stat(new_j['info']['full']['filename']).st_size, 
-		'checksum': sha256_checksum(new_j['info']['full']['filename'])})
 	new_j['info']['complete'].update({'size': os.stat(new_j['info']['complete']['filename']).st_size, 
 		'checksum': sha256_checksum(new_j['info']['complete']['filename'])})
+	if not new_j['acquire_complete_update']:
+		new_j['info']['diff'].update({'size': os.stat(new_j['info']['diff']['filename']).st_size, 
+			'checksum': sha256_checksum(new_j['info']['diff']['filename'])})
+		new_j['info']['full'].update({'size': os.stat(new_j['info']['full']['filename']).st_size, 
+			'checksum': sha256_checksum(new_j['info']['full']['filename'])})
 
-	print('Please enter diff info, Press EOF to exit:\n  Hint:\n    `+ modname\' for new mod\n    `- modname` for delete mod')
-
-	new_j['diff'] = []
-	try:
-		while True:
-			new_j['diff'].append(read_with_re('', diff_re, '\ndiff message format error, try again:\n'))
-	except EOFError:
-		pass
+		print('Please enter diff info, Press EOF to exit:\n  Hint:\n    `+ modname\' for new mod\n    `- modname` for delete mod')
+		new_j['diff'] = []
+		try:
+			while True:
+				new_j['diff'].append(read_with_re('', diff_re, '\ndiff message format error, try again:\n'))
+		except EOFError:
+			pass
 
 	new_j['timestamp'] = gen_current_time()
 
 	print('Json preview:')
-	print(json.dumps(new_j, sort_keys=True, indent=4, separators=(',', ': ')))
+	print(json.dumps(new_j, indent=4, separators=(',', ': ')))
 	if no_re.match(raw_input('Write json file to disk? [Y/n]: ')):
+		print('Change is not affect!')
 		return
 	try:
 		os.rename('LATEST', 'mc_json_{}'.format(old_j['timestamp']))
@@ -108,6 +117,7 @@ def main():
 			fout.write(json.dumps(new_j, sort_keys=True, indent=4, separators=(',', ': ')))
 	except IOError:
 		print('Cannot write to `LATEST\' file, please try again')
+	print('Write to LATEST completed.')
 
 def init():
 	reload(sys)
