@@ -354,4 +354,11 @@ test.py
 *.zip
 
 .vscode/
+.minecraft*/
+*.exe
+*.dll
 
+# data file
+game-updater/dlwebsite.h
+game-updater/*.json
+game-updater/*.sig

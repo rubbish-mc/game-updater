@@ -49,7 +49,7 @@ def read_with_re(prompt, r, error_msg='Input error, please try again: '):
 
 def main():
 	try:
-		with open('LATEST') as fin:
+		with open('LATEST.json') as fin:
 			old_j = json.load(fin)
 	except IOError:
 		old_j = {}
@@ -64,6 +64,12 @@ def main():
 		new_j['version']['minor'] = 0
 	else:
 		new_j['version']['minor'] += 1
+
+	new_j['base_rewrite'] = bool(yes_re.match(raw_input('Do you want to rewrite client update base url? [y/N]: ')))
+	if new_j['base_rewrite']:
+		new_j['new_site'] = raw_input('Please type new url: ')
+		while no_re.match(raw_input('Is you input is right? [Y/n]:')):
+			new_j['new_site'] = raw_input('Please type new url: ')
 
 	new_j['acquire_complete_update'] = bool(yes_re.match(raw_input('Do you want to force acquire client update? [y/N]: ')))
 
@@ -109,11 +115,11 @@ def main():
 		print('Change is not affect!')
 		return
 	try:
-		os.rename('LATEST', 'mc_json_{}'.format(old_j['timestamp']))
+		os.rename('LATEST.json', 'mc_json_{}.json'.format(old_j['timestamp']))
 	except Exception:
 		pass
 	try:
-		with open('LATEST', 'w') as fout:
+		with open('LATEST.json', 'w') as fout:
 			fout.write(json.dumps(new_j, sort_keys=True, indent=4, separators=(',', ': ')))
 	except IOError:
 		print('Cannot write to `LATEST\' file, please try again')
@@ -126,4 +132,3 @@ def init():
 if __name__ == '__main__':
 	init()
 	main()
-

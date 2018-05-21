@@ -24,7 +24,13 @@
     <ClInclude Include="download_file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="json.h">
+    <ClInclude Include="PicoSHA2\picosha2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="license.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dlwebsite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,9 +42,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="download_file.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="json.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

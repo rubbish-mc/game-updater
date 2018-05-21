@@ -1,0 +1,4 @@
+#pragma once
+#include <string>
+std::string base_website = "https://dl.minecraft.example.com/mcdownload/";
+const char * json_file = "https://dl.minecraft.example.com/mcdownload/LATEST.json";
